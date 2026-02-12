@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/salsify.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
