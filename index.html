@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Salsify SKU Viewer</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    .card { max-width: 720px; margin: 0 auto; padding: 1.25rem; border: 1px solid #e0e0e0; border-radius: 8px; }
+    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+    label { display: block; margin: 0.75rem 0 0.25rem; }
+    input { width: 100%; padding: 0.5rem; font-size: 1rem; }
+    button { margin-top: 0.75rem; padding: 0.6rem 1rem; font-size: 1rem; cursor: pointer; }
+    .result { margin-top: 1rem; padding: 0.75rem; background: #fafafa; border: 1px dashed #ddd; border-radius: 6px; white-space: pre-wrap; }
+    .muted { color: #666; font-size: 0.9rem; }
+    .error { color: #b00020; }
+    .loading { opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Salsify – Blocked Channels & Countries</h1>
+
+    <label for="sku">Enter SKU / Product ID</label>
+    <input id="sku" type="text" placeholder="e.g., 100089" />
+
+    <button id="fetchBtn">Fetch</button>
+
+    <div id="status" class="muted"></div>
+
+    <div id="output" class="result"></div>
+
+    <p class="muted">
+      Note: API calls are proxied securely via a serverless function. No secrets are stored in the browser.
+    </p>
+  </div>
+
+  <script>
+    const btn = document.getElementById('fetchBtn');
+    const statusEl = document.getElementById('status');
+    const outputEl = document.getElementById('output');
+    const input = document.getElementById('sku');
+
+    async function fetchData() {
+      const sku = input.value.trim();
+      if (!sku) {
+        statusEl.textContent = 'Please enter a SKU or product ID.';
+        statusEl.className = 'muted error';
+        return;
+      }
+      statusEl.textContent = 'Fetching…';
+      statusEl.className = 'muted loading';
+      outputEl.textContent = '';
+
+      try {
+        // Replace with your deployed proxy URL (see serverless section below)
+        const proxyBase = 'https://YOUR-VERCEL-APP.vercel.app/api/salsify';
+        const url = `${proxyBase}?sku=${encodeURIComponent(sku)}`;
+
+        const res = await fetch(url, { method: 'GET' });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Proxy error ${res.status}: ${text}`);
+        }
+        const data = await res.json();
+
+        const { sku: returnedSku, blockedChannels, blockedCountries, rawExtract } = data;
+
+        let lines = [];
+        lines.push(`SKU: ${returnedSku ?? sku}`);
+        lines.push('');
+        lines.push(`Blocked_Channels: ${Array.isArray(blockedChannels) ? blockedChannels.join(', ') : (blockedChannels ?? '—')}`);
+        lines.push(`Blocked_countries: ${Array.isArray(blockedCountries) ? blockedCountries.join(', ') : (blockedCountries ?? '—')}`);
+
+        // Optional: Show how we extracted if fields missing
+        if ((!blockedChannels || blockedChannels.length === 0) && (!blockedCountries || blockedCountries.length === 0)) {
+          lines.push('');
+          lines.push('(The expected fields were not found; see raw parsing keys below)');
+          lines.push(JSON.stringify(rawExtract, null, 2));
+        }
+
+        outputEl.textContent = lines.join('\n');
+        statusEl.textContent = 'Done';
+        statusEl.className = 'muted';
+      } catch (err) {
+        statusEl.textContent = 'Failed';
+        statusEl.className = 'muted error';
+        outputEl.textContent = `Error: ${err.message}`;
+      }
+    }
+
+    btn.addEventListener('click', fetchData);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchData(); });
+  </script>
+</body>
+</html>
