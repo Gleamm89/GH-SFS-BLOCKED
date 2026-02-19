@@ -4,29 +4,34 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  export:
+  export_attributes:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-- name: Export attributes
-  env:
-    SAL_BASE_URL: https://app.salsify.com
-    SAL_ORG_ID: ${{ secrets.SALSIFY_ORG_ID }}
-    SAL_API_KEY: ${{ secrets.SALSIFY_TOKEN }}
-    SAL_OUTPUT: attributes.json
-  run: |
-    node src/export-attributes.js
-    ls -lah attributes.json
+      - name: Export attributes from Salsify
+        env:
+          # Keep this unless your Salsify tenant uses a different host
+          SAL_BASE_URL: https://app.salsify.com
 
+          # Map to YOUR existing secret names (from your screenshot)
+          SAL_ORG_ID: ${{ secrets.SALSIFY_ORG_ID }}
+          SAL_API_KEY: ${{ secrets.SALSIFY_TOKEN }}
 
-      - name: Upload attributes artifact
+          # Output file name
+          SAL_OUTPUT: attributes.json
+        run: |
+          node src/export-attributes.js
+          ls -lah attributes.json
+
+      - name: Upload attributes.json as artifact
         uses: actions/upload-artifact@v4
         with:
           name: salsify-attributes
