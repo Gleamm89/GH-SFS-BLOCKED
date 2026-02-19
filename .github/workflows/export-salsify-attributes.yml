@@ -20,8 +20,8 @@ jobs:
       - name: Export attributes from Salsify
         env:
           SAL_BASE_URL: https://app.salsify.com
-          SAL_ORG_ID: "s-852ea8aa-b3aa-44b6-8c04-7bc2acefd665"
-          SAL_API_KEY: "kJZE1NKCuoOi7oyhYAv-81KIK4sN3dvmsskJD_zKLFc"
+          SAL_ORG_ID: ${{ secrets.SALSIFY_ORG_ID }}
+          SAL_API_KEY: ${{ secrets.SALSIFY_TOKEN }}
           SAL_OUTPUT: attributes.json
         run: |
           node src/export-attributes.js
