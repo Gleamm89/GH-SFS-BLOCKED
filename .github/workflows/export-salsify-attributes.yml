@@ -15,18 +15,12 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm install
-        # (No dependencies required, but npm install is safe if you add any later)
-
       - name: Export attributes
         env:
-          SAL_BASE_URL: ${{ secrets.SAL_BASE_URL }}
           SAL_ORG_ID: ${{ secrets.SAL_ORG_ID }}
           SAL_API_KEY: ${{ secrets.SAL_API_KEY }}
           SAL_OUTPUT: attributes.json
         run: |
-          # If SAL_BASE_URL secret is not set, default is used by the script.
           node src/export-attributes.js
           ls -lah attributes.json
 
