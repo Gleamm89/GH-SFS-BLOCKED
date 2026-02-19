@@ -17,7 +17,7 @@ async function main() {
     method: "GET",
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${API_KEY}`   // <- matches what worked for you in Postman
+      Authorization: `Bearer ${API_KEY}`
     }
   });
 
@@ -27,8 +27,6 @@ async function main() {
   }
 
   const json = await res.json();
-
-  // Some APIs return {data:[...]} others return [...]
   const attrs = Array.isArray(json) ? json : (json.data ?? json);
 
   fs.writeFileSync(OUTPUT, JSON.stringify(attrs, null, 2));
