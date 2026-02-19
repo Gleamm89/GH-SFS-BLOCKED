@@ -17,7 +17,7 @@ jobs:
 
       - name: Export attributes
         env:
-          SAL_ORG_ID: ${{ secrets.SAL_ORG_ID }}
+          SAL_ORG_ID: s-852ea8aa-b3aa-44b6-8c04-7bc2acefd665
           SAL_API_KEY: ${{ secrets.SAL_API_KEY }}
           SAL_OUTPUT: attributes.json
         run: |
